@@ -18,8 +18,9 @@ export class CreateBookingComponent implements OnInit {
   constructor(private modalCtrl: ModalController) {}
 
   ngOnInit() {
+    console.log(this.bookedPlace);
     const availableFrom = new Date(this.bookedPlace.availableFrom);
-    const availableTo = new Date(this.bookedPlace.availabelTo);
+    const availableTo = new Date(this.bookedPlace.availableTo);
     if (this.selectedMode === 'random') {
       this.startDate = new Date(
         availableFrom.getTime() +
@@ -46,7 +47,6 @@ export class CreateBookingComponent implements OnInit {
     if (!this.form.valid || !this.datesValid()) {
       return;
     }
-
     this.modalCtrl.dismiss(
       {
         bookingData: {
@@ -54,7 +54,7 @@ export class CreateBookingComponent implements OnInit {
           lastName: this.form.value.lastName,
           guestNumber: this.form.value.guestNumber,
           startDate: new Date(this.form.value.dateFrom),
-          endDae: new Date(this.form.value.dateTo)
+          endDate: new Date(this.form.value.dateTo)
         }
       },
       'confirm'
@@ -62,6 +62,9 @@ export class CreateBookingComponent implements OnInit {
   }
 
   datesValid() {
+    if (!this.form) {
+      return;
+    }
     const startDate = new Date(this.form.value.dateFrom);
     const endDate = new Date(this.form.value.dateTo);
     return startDate < endDate;

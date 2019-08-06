@@ -46,15 +46,17 @@
           <ion-item>
             <ion-label position="floating">From</ion-label>
             <ion-datetime display-format="MMM DD YYYY" picker-format="YY MMM DD"
-              [min]="bookedPlace.availableFrom.toISOString()" [max]="bookedPlace.availabelTo.toISOString()"
+              [min]="bookedPlace.availableFrom.toISOString()" [max]="bookedPlace.availableTo.toISOString()"
               [ngModel]="startDate" name="dateFrom" required #fromDateCtrl="ngModel"></ion-datetime>
           </ion-item>
         </ion-col>
         <ion-col size-sm="3">
           <ion-item>
             <ion-label position="floating">To</ion-label>
-            <ion-datetime display-format="MMM DD YYYY" picker-format="YY MMM DD" [min]="fromDateCtrl.value" [max]=""
-              [ngModel]="endDate" name="dateTo" required></ion-datetime>
+            <ion-datetime display-format="MMM DD YYYY" picker-format="YY MMM DD"
+              [min]="fromDateCtrl.value ? fromDateCtrl.value : ''" [max]="bookedPlace.availableTo.toISOString()"
+              [ngModel]="endDate" name="dateTo" required>
+            </ion-datetime>
           </ion-item>
         </ion-col>
       </ion-row>

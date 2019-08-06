@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Place } from '../../places.model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { PlacesService } from '../../places.service';
 import { NavController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
+import { Place } from '../../places.model';
+import { PlacesService } from '../../places.service';
 
 @Component({
   selector: 'app-place-booking',
@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 export class PlaceBookingPage implements OnInit, OnDestroy {
   place: Place;
   placeSub: Subscription;
+  placeId: string;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -26,6 +27,7 @@ export class PlaceBookingPage implements OnInit, OnDestroy {
         this.navCtrl.navigateBack('/places/tabs/offers');
         return;
       }
+      this.placeId = paramsMap.get('placeId');
       this.placeSub = this.placesService
         .getPlace(paramsMap.get('placeId'))
         .subscribe(place => {

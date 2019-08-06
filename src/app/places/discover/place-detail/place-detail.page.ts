@@ -1,17 +1,18 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
-  NavController,
-  ModalController,
   ActionSheetController,
-  LoadingController
+  AlertController,
+  LoadingController,
+  ModalController,
+  NavController
 } from '@ionic/angular';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/auth.service';
+import { BookingService } from 'src/app/bookings/booking.service';
+import { CreateBookingComponent } from 'src/app/bookings/create-booking/create-booking.component';
 import { Place } from '../../places.model';
 import { PlacesService } from '../../places.service';
-import { CreateBookingComponent } from 'src/app/bookings/create-booking/create-booking.component';
-import { Subscription } from 'rxjs';
-import { BookingService } from 'src/app/bookings/booking.service';
-import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-place-detail',
@@ -31,6 +32,8 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
     private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
+    private router: Router,
     private authService: AuthService
   ) {}
 
@@ -41,10 +44,28 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       } else {
         this.placeSub = this.placesService
           .getPlace(paramsMap.get('placeId'))
-          .subscribe(place => {
-            this.place = place;
-            this.isBookable = place.userId !== this.authService.getUserId();
-          });
+          .subscribe(
+            place => {
+              this.place = place;
+              this.isBookable = place.userId !== this.authService.getUserId();
+            },
+            error => {
+              this.alertCtrl
+                .create({
+                  header: 'An error occured',
+                  message: 'Could not load place. Please try again later!',
+                  buttons: [
+                    {
+                      text: 'Okay',
+                      handler: () => {
+                        this.router.navigate(['/places/tabs/discover']);
+                      }
+                    }
+                  ]
+                })
+                .then(alertEl => alertEl.present());
+            }
+          );
       }
     });
   }
@@ -106,7 +127,10 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
                   data.startDate,
                   data.endDate
                 )
-                .subscribe(() => loadingEl.dismiss());
+                .subscribe(() => {
+                  loadingEl.dismiss();
+                  this.router.navigate(['/bookings']);
+                });
             });
         }
       });
