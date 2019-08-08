@@ -13,6 +13,7 @@ import { BookingService } from 'src/app/bookings/booking.service';
 import { CreateBookingComponent } from 'src/app/bookings/create-booking/create-booking.component';
 import { Place } from '../../places.model';
 import { PlacesService } from '../../places.service';
+import { MapModalComponent } from 'src/app/shared/map-modal/map-modal.component';
 
 @Component({
   selector: 'app-place-detail',
@@ -22,6 +23,7 @@ import { PlacesService } from '../../places.service';
 export class PlaceDetailPage implements OnInit, OnDestroy {
   place: Place;
   isBookable = false;
+  locationImage: string;
   placeSub: Subscription;
 
   constructor(
@@ -46,8 +48,15 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
           .getPlace(paramsMap.get('placeId'))
           .subscribe(
             place => {
+              console.log(place);
               this.place = place;
               this.isBookable = place.userId !== this.authService.getUserId();
+              this.locationImage = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s(${
+                place.address.lng
+              },${place.address.lat})/
+              ${place.address.lng},${
+                place.address.lat
+              },10,0,0/300x200?access_token=pk.eyJ1Ijoia2toYW5obHV1IiwiYSI6ImNqejF2cnpjZzBwYmIzZGxvMnl0ZGcxM2UifQ.9CODXiqDDccpSiexvQ6WCg`;
             },
             error => {
               this.alertCtrl
@@ -136,6 +145,17 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       });
   }
 
+  onShowFullMap() {
+    this.modalCtrl
+      .create({
+        component: MapModalComponent,
+        componentProps: {
+          center: { lat: this.place.address.lat, lng: this.place.address.lng },
+          selectable: false
+        }
+      })
+      .then(modalEl => modalEl.present());
+  }
   ngOnDestroy() {
     if (this.placeSub) {
       this.placeSub.unsubscribe();

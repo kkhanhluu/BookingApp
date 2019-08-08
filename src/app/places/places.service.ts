@@ -4,6 +4,7 @@ import { AuthService } from '../auth/auth.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { take, filter, map, tap, delay, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { Address } from './location.model';
 
 interface PlaceData {
   availableTo: string;
@@ -13,6 +14,7 @@ interface PlaceData {
   price: number;
   title: string;
   userId: string;
+  address: Address;
 }
 
 @Injectable({
@@ -42,7 +44,8 @@ export class PlacesService {
                   resData[key].price,
                   new Date(resData[key].availableFrom),
                   new Date(resData[key].availableTo),
-                  resData[key].userId
+                  resData[key].userId,
+                  resData[key].address
                 )
               );
             }
@@ -74,7 +77,8 @@ export class PlacesService {
             placeData.price,
             new Date(placeData.availableFrom),
             new Date(placeData.availableTo),
-            placeData.userId
+            placeData.userId,
+            placeData.address
           );
         })
       );
@@ -85,7 +89,8 @@ export class PlacesService {
     description: string,
     price: number,
     dateFrom: Date,
-    dateTo: Date
+    dateTo: Date,
+    address: Address
   ) {
     let generatedId: string;
     const newPlace = new Place(
@@ -96,7 +101,8 @@ export class PlacesService {
       price,
       dateFrom,
       dateTo,
-      this.authService.getUserId()
+      this.authService.getUserId(),
+      address
     );
     return this.http
       .post<{ name: string }>(
