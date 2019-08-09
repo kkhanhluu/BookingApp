@@ -81,29 +81,29 @@ export class NewOfferPage implements OnInit {
       .then(loadingEl => {
         loadingEl.present();
         this.placesService
-          // .uploadImage(this.form.get('image').value)
-          // .pipe(
-          //   switchMap(uploadResponse => {
-          //     return this.placesService.addPlace(
-          //       this.form.value.title,
-          //       this.form.value.description,
-          //       +this.form.value.price,
-          //       new Date(this.form.value.dateFrom),
-          //       new Date(this.form.value.dateTo),
-          //       this.form.value.location,
-          //       uploadResponse.imageUrl
-          //     );
-          //   })
-          // )
-          .addPlace(
-            this.form.value.title,
-            this.form.value.description,
-            +this.form.value.price,
-            new Date(this.form.value.dateFrom),
-            new Date(this.form.value.dateTo),
-            this.form.value.location,
-            'https://mytourcdn.com/upload_images/Image/Location/24_2_2015/9-Du-lich-chua-mot-cot-mytour-1.jpg'
+          .uploadImage(this.form.get('image').value)
+          .pipe(
+            switchMap(uploadResponse => {
+              return this.placesService.addPlace(
+                this.form.value.title,
+                this.form.value.description,
+                +this.form.value.price,
+                new Date(this.form.value.dateFrom),
+                new Date(this.form.value.dateTo),
+                this.form.value.location,
+                uploadResponse.imageUrl
+              );
+            })
           )
+          // .addPlace(
+          //   this.form.value.title,
+          //   this.form.value.description,
+          //   +this.form.value.price,
+          //   new Date(this.form.value.dateFrom),
+          //   new Date(this.form.value.dateTo),
+          //   this.form.value.location,
+          //   'https://mytourcdn.com/upload_images/Image/Location/24_2_2015/9-Du-lich-chua-mot-cot-mytour-1.jpg'
+          // )
           .subscribe(() => {
             loadingEl.dismiss();
             this.form.reset();
