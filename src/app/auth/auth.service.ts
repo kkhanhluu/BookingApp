@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
 
 import { User } from './user.model';
 import { map, tap } from 'rxjs/operators';
+import { Plugins } from '@capacitor/core';
 
 export interface AuthResponseData {
   idToken: string;
@@ -18,13 +19,28 @@ export interface AuthResponseData {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
+  private activeLogoutTimer: any;
   private user = new BehaviorSubject<User>(null);
 
   constructor(private http: HttpClient) {}
 
+  get token() {
+    return this.user.asObservable().pipe(
+      map(user => {
+        if (user) {
+          return user.getToken();
+        }
+        return null;
+      })
+    );
+  }
   logout() {
+    if (this.activeLogoutTimer) {
+      clearTimeout(this.activeLogoutTimer);
+    }
     this.user.next(null);
+    Plugins.Storage.remove({ key: 'authData' });
   }
 
   getUserIsAuthenticated() {
@@ -83,17 +99,83 @@ export class AuthService {
       .pipe(tap(userData => this.setUserData(userData)));
   }
 
+  autoLogin() {
+    return from(Plugins.Storage.get({ key: 'authData' })).pipe(
+      map(authData => {
+        if (!authData || !authData.value) {
+          return null;
+        }
+        const parsedData = JSON.parse(authData.value) as {
+          token: string;
+          tokenExpirationDate: string;
+          userId: string;
+          email: string;
+        };
+        const expirationTime = new Date(parsedData.tokenExpirationDate);
+        if (expirationTime <= new Date()) {
+          return null;
+        }
+        const user = new User(
+          parsedData.userId,
+          parsedData.email,
+          parsedData.token,
+          expirationTime
+        );
+        return user;
+      }),
+      tap(user => {
+        if (user) {
+          this.user.next(user);
+          this.autoLogout(user.tokenDuration);
+        }
+      }),
+      map(user => {
+        return !!user;
+      })
+    );
+  }
   private setUserData(userData: AuthResponseData) {
     const expirationDate = new Date(
       new Date().getTime() + +userData.expiresIn * 1000
     );
-    this.user.next(
-      new User(
-        userData.localId,
-        userData.email,
-        userData.idToken,
-        expirationDate
-      )
+    const user = new User(
+      userData.localId,
+      userData.email,
+      userData.idToken,
+      expirationDate
     );
+    this.user.next(user);
+    this.autoLogout(user.tokenDuration);
+    this.storeAuthData(
+      userData.localId,
+      userData.idToken,
+      expirationDate.toISOString(),
+      userData.email
+    );
+  }
+
+  private storeAuthData(
+    userId: string,
+    token: string,
+    tokenExpirationDate: string,
+    email: string
+  ) {
+    const data = JSON.stringify({ userId, token, tokenExpirationDate, email });
+    Plugins.Storage.set({ key: 'authData', value: data });
+  }
+
+  private autoLogout(duration: number) {
+    if (this.activeLogoutTimer) {
+      clearTimeout(this.activeLogoutTimer);
+    }
+    this.activeLogoutTimer = setTimeout(() => {
+      this.logout();
+    }, duration);
+  }
+
+  ngOnDestroy() {
+    if (this.activeLogoutTimer) {
+      clearTimeout(this.activeLogoutTimer);
+    }
   }
 }

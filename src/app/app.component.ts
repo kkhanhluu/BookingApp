@@ -1,16 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { Platform } from '@ionic/angular';
 import { Plugins, Capacitor } from '@capacitor/core';
 import { AuthService } from './auth/auth.service';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
+  authSub: Subscription;
+
   constructor(
     private platform: Platform,
     private authService: AuthService,
@@ -19,6 +22,15 @@ export class AppComponent {
     this.initializeApp();
   }
 
+  ngOnInit() {
+    this.authSub = this.authService
+      .getUserIsAuthenticated()
+      .subscribe(isAuth => {
+        if (!isAuth) {
+          this.router.navigateByUrl('/auth');
+        }
+      });
+  }
   initializeApp() {
     this.platform.ready().then(() => {
       if (Capacitor.isPluginAvailable('SplashScreen')) {
@@ -28,7 +40,12 @@ export class AppComponent {
   }
 
   onLogout() {
-    this.router.navigateByUrl('/auth');
     this.authService.logout();
+  }
+
+  ngOnDestroy() {
+    if (this.authSub) {
+      this.authSub.unsubscribe();
+    }
   }
 }

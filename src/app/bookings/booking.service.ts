@@ -17,14 +17,20 @@ export class BookingService {
   }
 
   fetchBookings() {
+    let fetchUserId: string;
     return this.authService.getUserId().pipe(
       take(1),
       switchMap(userId => {
         if (!userId) {
           throw new Error('No user found');
         }
+        fetchUserId = userId;
+        return this.authService.token;
+      }),
+      take(1),
+      switchMap(token => {
         return this.http.get(
-          `https://ionic-travel-app-773ae.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${userId}"`
+          `https://ionic-travel-app-773ae.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${fetchUserId}"&auth=${token}`
         );
       }),
       tap(resData => {
@@ -62,16 +68,22 @@ export class BookingService {
     dateTo: Date
   ) {
     let newBooking: Booking;
+    let fetchedUserId: string;
     return this.authService.getUserId().pipe(
       take(1),
       switchMap(userId => {
         if (!userId) {
           throw new Error('No user id found!');
         }
+        fetchedUserId = userId;
+        return this.authService.token;
+      }),
+      take(1),
+      switchMap(token => {
         newBooking = new Booking(
           Math.random().toString(),
           placeId,
-          userId,
+          fetchedUserId,
           placeTitle,
           placeImage,
           firstName,
@@ -81,7 +93,7 @@ export class BookingService {
           guestNumber
         );
         return this.http.post(
-          'https://ionic-travel-app-773ae.firebaseio.com/bookings.json',
+          `https://ionic-travel-app-773ae.firebaseio.com/bookings.json${token}`,
           {
             ...newBooking,
             id: null
@@ -99,18 +111,23 @@ export class BookingService {
   }
 
   cancelBooking(id: string) {
-    return this.http
-      .delete(
-        `https://ionic-travel-app-773ae.firebaseio.com/bookings/${id}.json`
-      )
-      .pipe(
-        switchMap(() => {
-          return this.bookings;
-        }),
-        take(1),
-        tap(bookings => {
-          this.bookings.next(bookings.filter(b => b.id !== id));
-        })
-      );
+    return this.authService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.http
+          .delete(
+            `https://ionic-travel-app-773ae.firebaseio.com/bookings/${id}.json?auth=${token}`
+          )
+          .pipe(
+            switchMap(() => {
+              return this.bookings;
+            }),
+            take(1),
+            tap(bookings => {
+              this.bookings.next(bookings.filter(b => b.id !== id));
+            })
+          );
+      })
+    );
   }
 }

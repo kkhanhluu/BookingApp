@@ -14,7 +14,7 @@ import { CreateBookingComponent } from 'src/app/bookings/create-booking/create-b
 import { Place } from '../../places.model';
 import { PlacesService } from '../../places.service';
 import { MapModalComponent } from 'src/app/shared/map-modal/map-modal.component';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-place-detail',
@@ -49,6 +49,7 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       this.authService
         .getUserId()
         .pipe(
+          take(1),
           switchMap(userId => {
             if (!userId) {
               throw new Error('No user found');
