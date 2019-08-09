@@ -20,12 +20,15 @@ export class GuardGuard implements CanLoad {
       take(1),
       switchMap(isAuthenticated => {
         if (!isAuthenticated) {
+          console.log('autologin');
           return this.authService.autoLogin();
         } else {
+          console.log('else');
           return of(isAuthenticated);
         }
       }),
       tap(isAuthenticated => {
+        console.log(isAuthenticated);
         if (!isAuthenticated) {
           this.router.navigateByUrl('/auth');
         }

@@ -86,7 +86,7 @@ exports.storeImage = functions.https.onRequest((req, res) => {
         })
         .catch(error => {
           console.log(error);
-          return res.status(401).json({ error: 'Unauthorized!' });
+          return res.status(401).json({ error: error });
         });
     });
     return busboy.end(req.rawBody);

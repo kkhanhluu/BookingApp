@@ -1,6 +1,6 @@
 {
-  "appId": "ionic.recipe.khanh",
-  "appName": "recipe-app",
+  "appId": "ionic.booking.khanh",
+  "appName": "booking-app",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "www"
