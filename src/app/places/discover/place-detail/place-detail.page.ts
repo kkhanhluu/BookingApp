@@ -14,6 +14,7 @@ import { CreateBookingComponent } from 'src/app/bookings/create-booking/create-b
 import { Place } from '../../places.model';
 import { PlacesService } from '../../places.service';
 import { MapModalComponent } from 'src/app/shared/map-modal/map-modal.component';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-place-detail',
@@ -43,39 +44,48 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     this.activatedRoute.paramMap.subscribe(paramsMap => {
       if (!paramsMap.has('placeId')) {
         this.navCtrl.navigateBack('/places/tabs/discover');
-      } else {
-        this.placeSub = this.placesService
-          .getPlace(paramsMap.get('placeId'))
-          .subscribe(
-            place => {
-              console.log(place);
-              this.place = place;
-              this.isBookable = place.userId !== this.authService.getUserId();
-              this.locationImage = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s(${
-                place.address.lng
-              },${place.address.lat})/
-              ${place.address.lng},${
-                place.address.lat
-              },10,0,0/300x200?access_token=pk.eyJ1Ijoia2toYW5obHV1IiwiYSI6ImNqejF2cnpjZzBwYmIzZGxvMnl0ZGcxM2UifQ.9CODXiqDDccpSiexvQ6WCg`;
-            },
-            error => {
-              this.alertCtrl
-                .create({
-                  header: 'An error occured',
-                  message: 'Could not load place. Please try again later!',
-                  buttons: [
-                    {
-                      text: 'Okay',
-                      handler: () => {
-                        this.router.navigate(['/places/tabs/discover']);
-                      }
-                    }
-                  ]
-                })
-                .then(alertEl => alertEl.present());
-            }
-          );
       }
+      let fetchedUserId: string;
+      this.authService
+        .getUserId()
+        .pipe(
+          switchMap(userId => {
+            if (!userId) {
+              throw new Error('No user found');
+            }
+            fetchedUserId = userId;
+            return this.placesService.getPlace(paramsMap.get('placeId'));
+          })
+        )
+        .subscribe(
+          place => {
+            console.log(place);
+            this.place = place;
+            this.isBookable = place.userId !== fetchedUserId;
+            this.locationImage = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s(${
+              place.address.lng
+            },${place.address.lat})/
+              ${place.address.lng},${
+              place.address.lat
+            },10,0,0/300x200?access_token=pk.eyJ1Ijoia2toYW5obHV1IiwiYSI6ImNqejF2cnpjZzBwYmIzZGxvMnl0ZGcxM2UifQ.9CODXiqDDccpSiexvQ6WCg`;
+          },
+          error => {
+            this.alertCtrl
+              .create({
+                header: 'An error occured',
+                message: 'Could not load place. Please try again later!',
+                buttons: [
+                  {
+                    text: 'Okay',
+                    handler: () => {
+                      this.router.navigate(['/places/tabs/discover']);
+                    }
+                  }
+                ]
+              })
+              .then(alertEl => alertEl.present());
+          }
+        );
     });
   }
 
