@@ -15,7 +15,8 @@ const routes: Routes = [
   },
   {
     path: 'bookings',
-    loadChildren: './bookings/bookings.module#BookingsPageModule'
+    loadChildren: './bookings/bookings.module#BookingsPageModule',
+    canLoad: [GuardGuard]
   }
 ];
 

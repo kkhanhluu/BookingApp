@@ -1,37 +1,23 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-
+import { Component, OnInit } from '@angular/core';
+import { AppState, Capacitor, Plugins } from '@capacitor/core';
 import { Platform } from '@ionic/angular';
-import { Plugins, Capacitor, AppState } from '@capacitor/core';
-import { AuthService } from './auth/auth.service';
-import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   authSub: Subscription;
 
-  constructor(
-    private platform: Platform,
-    private authService: AuthService,
-    private router: Router
-  ) {
+  constructor(private platform: Platform, private authService: AuthService) {
     this.initializeApp();
   }
 
   ngOnInit() {
-    this.authSub = this.authService
-      .getUserIsAuthenticated()
-      .subscribe(isAuth => {
-        if (!isAuth) {
-          this.router.navigateByUrl('/auth');
-        }
-      });
-
     Plugins.App.addListener('appStateChange', this.checkAuthResume);
   }
   initializeApp() {
@@ -44,12 +30,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   onLogout() {
     this.authService.logout();
-  }
-
-  ngOnDestroy() {
-    if (this.authSub) {
-      this.authSub.unsubscribe();
-    }
   }
 
   private checkAuthResume(state: AppState) {

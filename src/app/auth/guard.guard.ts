@@ -14,21 +14,16 @@ export class GuardGuard implements CanLoad {
     route: Route,
     segments: UrlSegment[]
   ): Observable<boolean> | Promise<boolean> | boolean {
-    if (!this.authService.getUserIsAuthenticated()) {
-    }
     return this.authService.getUserIsAuthenticated().pipe(
       take(1),
       switchMap(isAuthenticated => {
         if (!isAuthenticated) {
-          console.log('autologin');
           return this.authService.autoLogin();
         } else {
-          console.log('else');
           return of(isAuthenticated);
         }
       }),
       tap(isAuthenticated => {
-        console.log(isAuthenticated);
         if (!isAuthenticated) {
           this.router.navigateByUrl('/auth');
         }

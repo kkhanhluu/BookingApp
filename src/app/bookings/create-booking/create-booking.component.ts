@@ -18,7 +18,6 @@ export class CreateBookingComponent implements OnInit {
   constructor(private modalCtrl: ModalController) {}
 
   ngOnInit() {
-    console.log(this.bookedPlace);
     const availableFrom = new Date(this.bookedPlace.availableFrom);
     const availableTo = new Date(this.bookedPlace.availableTo);
     if (this.selectedMode === 'random') {

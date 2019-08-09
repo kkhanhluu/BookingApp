@@ -9,10 +9,17 @@ export interface PlaceLocation extends Coordinates {
 
 export interface Address extends Coordinates {
   city: string;
+  city_district: string;
   country: string;
   country_code: string;
   county: string;
+  house_number: string;
+  lat: number;
+  lng: number;
+  neighbourhood: string;
   postcode: string;
+  road: string;
+  state: string;
+  state_district: string;
   suburb: string;
-  town: string;
 }

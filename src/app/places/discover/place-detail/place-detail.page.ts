@@ -15,6 +15,7 @@ import { Place } from '../../places.model';
 import { PlacesService } from '../../places.service';
 import { MapModalComponent } from 'src/app/shared/map-modal/map-modal.component';
 import { switchMap, take } from 'rxjs/operators';
+import { Address } from '../../location.model';
 
 @Component({
   selector: 'app-place-detail',
@@ -26,6 +27,7 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
   isBookable = false;
   locationImage: string;
   placeSub: Subscription;
+  addressLabel = '';
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -60,8 +62,8 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
         )
         .subscribe(
           place => {
-            console.log(place);
             this.place = place;
+            this.getAddressLabel(place.address);
             this.isBookable = place.userId !== fetchedUserId;
             this.locationImage = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s(${
               place.address.lng
@@ -170,6 +172,27 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.placeSub) {
       this.placeSub.unsubscribe();
+    }
+  }
+
+  private getAddressLabel(address: Address) {
+    if (address.road) {
+      this.addressLabel += address.road + ', ';
+    }
+    if (address.house_number) {
+      this.addressLabel += address.house_number + ', ';
+    }
+    if (address.postcode) {
+      this.addressLabel += address.postcode + ', ';
+    }
+    if (address.city) {
+      this.addressLabel += address.city + ', ';
+    }
+    if (address.state) {
+      this.addressLabel += address.state + ', ';
+    }
+    if (address.country) {
+      this.addressLabel += address.country;
     }
   }
 }
