@@ -1,7 +1,0 @@
-{
-  "appId": "ionic.booking.khanh",
-  "appName": "booking-app",
-  "bundledWebRuntime": false,
-  "npmClient": "npm",
-  "webDir": "www"
-}

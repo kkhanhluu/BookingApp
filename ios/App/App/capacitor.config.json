@@ -1,7 +1,0 @@
-{
-  "appId": "ionic.recipe.khanh",
-  "appName": "recipe-app",
-  "bundledWebRuntime": false,
-  "npmClient": "npm",
-  "webDir": "www"
-}
