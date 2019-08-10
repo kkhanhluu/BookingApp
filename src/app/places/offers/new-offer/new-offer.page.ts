@@ -113,7 +113,6 @@ export class NewOfferPage implements OnInit {
   }
 
   onLocationPicked(location: Address) {
-    console.log(location);
     this.form.patchValue({ location });
   }
 

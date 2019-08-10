@@ -97,7 +97,7 @@ export class PlacesService {
         return this.http.post<{ imageUrl: string; imagePath: string }>(
           'https://us-central1-ionic-travel-app-773ae.cloudfunctions.net/storeImage',
           uploadData,
-          { headers: { Athuorization: 'Bearer ' + token } }
+          { headers: { Authorization: 'Bearer ' + token } }
         );
       })
     );

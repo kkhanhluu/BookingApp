@@ -58,7 +58,6 @@ exports.storeImage = functions.https.onRequest((req, res) => {
         .auth()
         .verifyIdToken(idToken)
         .then(decodedToken => {
-          console.log(uploadData.type);
           return storage
             .bucket('ionic-travel-app-773ae.appspot.com')
             .upload(uploadData.filePath, {
